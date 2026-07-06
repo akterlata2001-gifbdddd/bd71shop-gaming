@@ -4,11 +4,11 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight, Zap, Sparkles, ShoppingBag, Star, ChevronRight, Truck, RefreshCw, ShieldCheck, Headphones,
-  Gamepad2, Gift, Wallet, Search,
+  Gamepad2, Gift, Wallet, Search, Flame, Check, Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useRouter } from "@/lib/store";
+import { useRouter, useCart } from "@/lib/store";
 import {
   siteInfo, categories, products, blogPosts, getFeaturedProducts, formatPrice,
 } from "@/lib/data";
@@ -16,181 +16,292 @@ import { ProductCard } from "@/components/site/product-card";
 
 export function HomePage() {
   const navigate = useRouter((s) => s.navigate);
+  const addItem = useCart((s) => s.addItem);
   const deals = getFeaturedProducts("deals");
   const popular = getFeaturedProducts("popular");
   const bestsellers = getFeaturedProducts("bestseller");
   const topCategories = ["google-play", "apple", "amazon", "steam", "free-fire", "pubg"];
   const recentBlogs = blogPosts.slice(0, 6);
 
-  // Quick-pick tiles for hero
-  const quickPicks = [
-    { emoji: "🔥", label: "Free Fire", desc: "Diamonds & Airdrops", category: "free-fire", gradient: "from-orange-500 to-red-500" },
-    { emoji: "🎯", label: "PUBG UC", desc: "Unknown Cash top-up", category: "pubg", gradient: "from-amber-500 to-yellow-500" },
-    { emoji: "▶️", label: "Google Play", desc: "Gift cards & codes", category: "google-play", gradient: "from-green-500 to-emerald-500" },
-    { emoji: "🍎", label: "Apple", desc: "App Store & iTunes", category: "apple", gradient: "from-zinc-500 to-slate-500" },
-    { emoji: "📦", label: "Amazon", desc: "USD/EUR/GBP cards", category: "amazon", gradient: "from-orange-600 to-amber-600" },
-    { emoji: "💨", label: "Steam", desc: "Wallet gift cards", category: "steam", gradient: "from-slate-600 to-blue-600" },
-  ];
+  // Featured hero deal (FF Airdrop — best discount)
+  const heroDeal = products.find((p) => p.id === 12) || deals[0];
+  const secondaryDeal = products.find((p) => p.id === 4) || deals[1];
+
+  const handleHeroBuyNow = () => {
+    if (!heroDeal) return;
+    addItem({
+      id: heroDeal.id,
+      name: heroDeal.name,
+      price: heroDeal.price,
+      emoji: heroDeal.emoji,
+      gradient: heroDeal.gradient,
+    });
+    navigate("checkout");
+  };
 
   return (
     <>
-      {/* NEW HERO — split layout with marquee + quick picks */}
+      {/* NEW PREMIUM HERO */}
       <section className="relative overflow-hidden">
-        {/* Decorative background */}
-        <div className="absolute inset-0 -z-10 bg-grid opacity-60" />
+        {/* Layered background */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute -top-20 -right-20 h-[420px] w-[420px] rounded-full bg-neon/15 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 h-[420px] w-[420px] rounded-full bg-cyber/12 blur-3xl" />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 h-[280px] w-[280px] rounded-full bg-magenta/8 blur-3xl" />
+          <div className="absolute inset-0 bg-grid opacity-50" />
+          {/* Mesh gradient blobs */}
+          <div className="absolute -top-32 right-0 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-neon/25 to-magenta/15 blur-3xl animate-pulse-glow" />
+          <div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-cyber/20 to-neon/10 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[700px] rounded-full bg-magenta/8 blur-3xl" />
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 pt-10 sm:pt-14 lg:pt-20 pb-8">
-          {/* Top pill row */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="flex flex-wrap items-center justify-center gap-2 mb-6"
-          >
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/60 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-card">
-              <span className="h-2 w-2 rounded-full bg-electric animate-pulse" />
-              Instant Digital Delivery
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/60 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-card">
-              <ShieldCheck className="h-3 w-3 text-cyber" />
-              100% Secure Payment
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/60 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-card">
-              <Headphones className="h-3 w-3 text-magenta" />
-              24/7 Support
-            </span>
-          </motion.div>
-
-          {/* Big headline */}
-          <div className="text-center max-w-4xl mx-auto">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-display text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] font-bold text-foreground leading-[1.02] tracking-tight text-balance"
-            >
-              Top up games.{" "}
-              <span className="relative inline-block">
-                <span className="text-gradient-neon">Unlock gifts.</span>
-                <motion.svg
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 1, delay: 0.8 }}
-                  className="absolute -bottom-3 left-0 w-full h-4 text-cyber"
-                  viewBox="0 0 300 14" fill="none" preserveAspectRatio="none"
-                >
-                  <motion.path
-                    d="M2 10 Q 75 2, 150 8 T 298 6"
-                    stroke="currentColor" strokeWidth="4" strokeLinecap="round" fill="none"
-                  />
-                </motion.svg>
-              </span>
-              <br />
-              <span className="text-foreground">Play instantly.</span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-6 text-base sm:text-lg lg:text-xl text-foreground/70 max-w-2xl mx-auto text-pretty leading-relaxed"
-            >
-              Bangladesh&apos;s premier destination for{" "}
-              <span className="font-semibold text-foreground">gaming top-ups</span>,{" "}
-              <span className="font-semibold text-foreground">gift cards</span>, and{" "}
-              <span className="font-semibold text-foreground">digital services</span>. Genuine codes,
-              best prices, delivered to your inbox within minutes.
-            </motion.p>
-
-            {/* Search + CTA */}
+        <div className="mx-auto max-w-7xl px-4 pt-10 sm:pt-14 lg:pt-20 pb-12 lg:pb-16">
+          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-12 items-center">
+            {/* LEFT — Copy */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-8 flex flex-col sm:flex-row gap-3 max-w-xl mx-auto"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="relative z-10 text-center lg:text-left"
             >
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="search"
-                  placeholder="Search Free Fire, Google Play, Amazon..."
-                  onFocus={() => navigate("shop")}
-                  readOnly
-                  className="w-full h-13 pl-11 pr-4 rounded-full bg-card border border-border/60 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-4 focus:ring-neon/20 cursor-pointer shadow-card"
-                />
-              </div>
-              <Button
-                size="lg"
-                className="h-13 px-7 rounded-full bg-gradient-to-r from-neon to-cyber hover:opacity-90 text-white shadow-neon text-base font-medium group whitespace-nowrap"
-                onClick={() => navigate("shop")}
+              {/* Trust pills */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-6"
               >
-                <ShoppingBag className="mr-2 h-5 w-5" />
-                Browse All
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </motion.div>
-          </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/60 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-card">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-electric opacity-75 animate-ping" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-electric" />
+                  </span>
+                  Instant Delivery
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/60 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-card">
+                  <ShieldCheck className="h-3 w-3 text-cyber" />
+                  100% Genuine Codes
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/60 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-card">
+                  <Headphones className="h-3 w-3 text-magenta" />
+                  24/7 Support
+                </span>
+              </motion.div>
 
-          {/* Quick picks grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4"
-          >
-            {quickPicks.map((pick, i) => (
-              <motion.button
-                key={pick.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.6 + i * 0.08 }}
-                whileHover={{ y: -4, scale: 1.02 }}
-                onClick={() => navigate("shop", { category: pick.category })}
-                className="group relative overflow-hidden bg-card rounded-2xl p-4 border border-border/60 shadow-card hover:shadow-neon transition-all text-center"
+              {/* Big headline */}
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-[1.05] tracking-tight text-balance">
+                Top up games.{" "}
+                <span className="relative inline-block">
+                  <span className="text-gradient-neon">Unlock gifts.</span>
+                  <motion.svg
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.8 }}
+                    className="absolute -bottom-2 left-0 w-full h-3 text-cyber"
+                    viewBox="0 0 300 12" fill="none" preserveAspectRatio="none"
+                  >
+                    <motion.path
+                      d="M2 8 Q 75 2, 150 6 T 298 5"
+                      stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none"
+                    />
+                  </motion.svg>
+                </span>
+                <br />
+                <span className="text-foreground">Play instantly.</span>
+              </h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="mt-6 text-base sm:text-lg text-foreground/70 max-w-xl mx-auto lg:mx-0 text-pretty leading-relaxed"
               >
-                {/* Gradient glow on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${pick.gradient} opacity-0 group-hover:opacity-10 transition-opacity`} />
-                <div className={`relative mx-auto mb-2 h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br ${pick.gradient} flex items-center justify-center text-2xl sm:text-3xl shadow-card group-hover:scale-110 group-hover:rotate-3 transition-transform`}>
-                  {pick.emoji}
+                Bangladesh&apos;s premier destination for{" "}
+                <span className="font-semibold text-foreground">gaming top-ups</span>,{" "}
+                <span className="font-semibold text-foreground">gift cards</span>, and{" "}
+                <span className="font-semibold text-foreground">digital services</span>. Genuine codes,
+                best prices, delivered to your inbox within minutes.
+              </motion.p>
+
+              {/* CTA buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start"
+              >
+                <Button
+                  size="lg"
+                  className="h-13 px-7 rounded-full bg-gradient-to-r from-neon to-cyber hover:opacity-90 text-white shadow-neon text-base font-medium group"
+                  onClick={() => navigate("shop")}
+                >
+                  <ShoppingBag className="mr-2 h-5 w-5" />
+                  Shop All Products
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-13 px-7 rounded-full border-2 border-border bg-card/60 backdrop-blur text-foreground hover:bg-secondary text-base font-medium"
+                  onClick={() => navigate("shop", { category: "free-fire" })}
+                >
+                  <Flame className="mr-2 h-5 w-5 text-orange-500" />
+                  Free Fire Top-Up
+                </Button>
+              </motion.div>
+
+              {/* Payment methods row */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-xs text-muted-foreground"
+              >
+                <span className="uppercase tracking-wider">We accept:</span>
+                {["bKash", "Nagad", "Rocket", "VISA", "Mastercard", "COD"].map((m) => (
+                  <span key={m} className="font-semibold text-foreground/80">{m}</span>
+                ))}
+              </motion.div>
+            </motion.div>
+
+            {/* RIGHT — Featured deal showcase */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="relative h-[480px] sm:h-[520px] lg:h-[560px]"
+            >
+              {/* Decorative glow ring behind cards */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[340px] w-[340px] rounded-full bg-gradient-to-br from-neon/30 to-cyber/20 blur-3xl" />
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[360px] w-[360px] rounded-full border-2 border-dashed border-neon/20"
+              />
+
+              {/* Secondary card (behind, rotated) */}
+              <motion.button
+                onClick={() => navigate("product", { productId: secondaryDeal?.id || 4 })}
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-4 right-2 sm:right-6 z-10 w-44 sm:w-52 bg-card rounded-2xl p-4 shadow-card border border-border/60 hover:shadow-neon transition-all text-left rotate-[6deg] hover:rotate-0"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-green-500/30 to-emerald-500/20 flex items-center justify-center text-3xl">
+                    {secondaryDeal?.emoji || "▶️"}
+                  </div>
+                  <Badge className="bg-magenta/15 text-magenta border-0 text-[10px]">
+                    -{secondaryDeal?.tag?.replace("-", "") || "4%"}
+                  </Badge>
                 </div>
-                <div className="relative">
-                  <div className="font-semibold text-sm text-foreground">{pick.label}</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">{pick.desc}</div>
+                <div className="text-xs font-medium text-cyber uppercase tracking-wider mb-1">Google Play</div>
+                <h3 className="text-sm font-semibold text-foreground line-clamp-2 leading-snug min-h-[2.5rem]">
+                  {secondaryDeal?.name || "Google Play Gift Card"}
+                </h3>
+                <div className="mt-2 flex items-baseline gap-1.5">
+                  <span className="font-display text-lg font-bold text-gradient-neon">
+                    ৳{formatPrice(secondaryDeal?.price || 670)}
+                  </span>
+                  <span className="text-xs text-muted-foreground line-through">
+                    ৳{formatPrice(secondaryDeal?.oldPrice || 700)}
+                  </span>
                 </div>
               </motion.button>
-            ))}
-          </motion.div>
 
-          {/* Category strip */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-2"
-          >
-            <span className="text-xs text-muted-foreground uppercase tracking-wider mr-2">Popular:</span>
-            {[
-              { label: "Free Fire Diamonds", cat: "free-fire" },
-              { label: "PUBG UC", cat: "pubg" },
-              { label: "Google Play Codes", cat: "google-play" },
-              { label: "Netflix Gift Cards", cat: "netflix" },
-              { label: "Razer Gold", cat: "razergold" },
-              { label: "Steam Wallet", cat: "steam" },
-            ].map((tag) => (
-              <button
-                key={tag.label}
-                onClick={() => navigate("shop", { category: tag.cat })}
-                className="text-xs px-3 py-1.5 rounded-full bg-card border border-border/60 text-foreground/70 hover:text-cyber hover:border-cyber/40 transition-colors"
+              {/* Main featured deal card */}
+              <motion.div
+                animate={{ y: [0, -12, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-72 sm:w-80"
               >
-                {tag.label}
-              </button>
-            ))}
-          </motion.div>
+                <div className="relative bg-card rounded-3xl overflow-hidden shadow-neon border border-border/60">
+                  {/* Top banner */}
+                  <div className="relative bg-gradient-to-r from-neon via-magenta to-cyber px-5 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-white">
+                      <Flame className="h-4 w-4" fill="currentColor" />
+                      <span className="font-display text-sm font-bold uppercase tracking-wider">Hot Deal</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-white/90 text-xs font-medium">
+                      <Clock className="h-3 w-3" />
+                      <span>Limited Time</span>
+                    </div>
+                  </div>
+
+                  {/* Product visual */}
+                  <div className={`relative h-44 bg-gradient-to-br ${heroDeal?.gradient || "from-orange-500/30 to-red-500/20"} flex items-center justify-center overflow-hidden`}>
+                    {/* Decorative circles */}
+                    <div className="absolute top-0 right-0 h-24 w-24 rounded-full border-2 border-dashed border-white/20" />
+                    <div className="absolute bottom-0 left-0 h-16 w-16 rounded-full border border-white/15" />
+                    <motion.div
+                      animate={{ rotate: [0, 5, -5, 0] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="text-8xl drop-shadow-2xl select-none"
+                    >
+                      {heroDeal?.emoji || "💎"}
+                    </motion.div>
+                    {/* Discount badge */}
+                    <div className="absolute top-3 left-3 bg-magenta text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-neon">
+                      -{heroDeal?.tag?.replace("-", "") || "23%"}
+                    </div>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="p-5">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-base">🔥</span>
+                      <span className="text-xs font-medium text-cyber uppercase tracking-wider">Free Fire</span>
+                    </div>
+                    <h3 className="font-display text-base font-semibold text-foreground leading-snug line-clamp-2 mb-3">
+                      {heroDeal?.name || "FF Airdrop Top Up BD – Instant Free Fire Diamonds"}
+                    </h3>
+
+                    {/* Features mini list */}
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {["Instant Delivery", "100% Genuine", "Best Price"].map((feat) => (
+                        <span key={feat} className="inline-flex items-center gap-1 text-[10px] font-medium text-foreground/70 bg-secondary px-2 py-0.5 rounded-full">
+                          <Check className="h-2.5 w-2.5 text-cyber" />
+                          {feat}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Price + CTA */}
+                    <div className="flex items-end justify-between gap-3">
+                      <div>
+                        <div className="text-xs text-muted-foreground line-through">
+                          ৳{formatPrice(heroDeal?.oldPrice || 90)}
+                        </div>
+                        <div className="font-display text-2xl font-bold text-gradient-neon">
+                          ৳{formatPrice(heroDeal?.price || 69)}
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleHeroBuyNow}
+                        size="sm"
+                        className="h-10 px-4 rounded-full bg-gradient-to-r from-neon to-cyber hover:opacity-90 text-white text-sm font-semibold shadow-neon group"
+                      >
+                        Buy Now
+                        <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Floating sparkles */}
+              <motion.div
+                animate={{ y: [0, -10, 0], opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-1/3 left-4 z-30 text-2xl"
+              >
+                ✨
+              </motion.div>
+              <motion.div
+                animate={{ y: [0, 8, 0], opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="absolute bottom-1/3 right-4 z-30 text-xl"
+              >
+                ⚡
+              </motion.div>
+            </motion.div>
+          </div>
         </div>
 
         {/* Marquee strip */}
