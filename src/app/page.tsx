@@ -1,0 +1,66 @@
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { SiteHeader } from "@/components/site/header";
+import { SiteFooter } from "@/components/site/footer";
+import { CartDrawer } from "@/components/site/cart-drawer";
+import { HomePage } from "@/components/pages/home";
+import { ShopPage } from "@/components/pages/shop";
+import { ProductDetailPage } from "@/components/pages/product-detail";
+import { CartPage } from "@/components/pages/cart";
+import { CheckoutPage } from "@/components/pages/checkout";
+import { AboutPage } from "@/components/pages/about";
+import { ContactPage } from "@/components/pages/contact";
+import { BlogPage } from "@/components/pages/blog";
+import { BlogSinglePage } from "@/components/pages/blog-single";
+import { LegalPage } from "@/components/pages/legal";
+import { NotFoundPage } from "@/components/pages/not-found";
+import { AccountPage } from "@/components/pages/account";
+import { OrderTrackingPage } from "@/components/pages/order-tracking";
+import { useRouter } from "@/lib/store";
+
+export default function Home() {
+  const page = useRouter((s) => s.page);
+
+  const renderPage = () => {
+    switch (page) {
+      case "home": return <HomePage />;
+      case "shop": return <ShopPage />;
+      case "product": return <ProductDetailPage />;
+      case "cart": return <CartPage />;
+      case "checkout": return <CheckoutPage />;
+      case "about": return <AboutPage />;
+      case "contact": return <ContactPage />;
+      case "blog": return <BlogPage />;
+      case "blog-single": return <BlogSinglePage />;
+      case "privacy": return <LegalPage page="privacy" />;
+      case "dmca": return <LegalPage page="dmca" />;
+      case "disclaimer": return <LegalPage page="disclaimer" />;
+      case "account": return <AccountPage />;
+      case "order-tracking": return <OrderTrackingPage />;
+      case "not-found": return <NotFoundPage />;
+      default: return <HomePage />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <SiteHeader />
+      <main className="flex-1">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={page}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {renderPage()}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+      <SiteFooter />
+      <CartDrawer />
+    </div>
+  );
+}

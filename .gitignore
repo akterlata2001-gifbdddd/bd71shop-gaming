@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# misc
+.DS_Store
+*.pem
+.env
+.env.local
+.env*.local
+
+# prisma
+prisma/*.db
+prisma/*.db-journal
+db/*.db
+db/*.db-journal
+
+# logs
+*.log
+dev.log
+server.log
+
+# scraped reference content
+bd71_content.json
+fetch_*.json
+fetch_*.html
+clean_*.txt
+newsite_pages/
+
+# zscripts
+.zscripts/
+
+# screenshots
+download/
