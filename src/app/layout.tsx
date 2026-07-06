@@ -1,26 +1,12 @@
 import type { Metadata } from "next";
-import { Orbitron, Outfit, JetBrains_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
-const orbitron = Orbitron({
-  variable: "--font-orbitron",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  display: "swap",
-});
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -64,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${orbitron.variable} ${outfit.variable} ${jetbrains.variable} antialiased bg-background text-foreground font-sans`}
+        className={`${poppins.variable} antialiased bg-background text-foreground font-sans`}
       >
         {children}
         <Toaster />
